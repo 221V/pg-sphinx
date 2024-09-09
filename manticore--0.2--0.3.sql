@@ -4,6 +4,6 @@ CREATE OR REPLACE FUNCTION sphinx_snippet_options(
   /*data*/      varchar,
   /*options*/   varchar[])
 RETURNS VARCHAR
-AS 'sphinx', 'pg_sphinx_snippet_options'
+AS 'manticore', 'pg_sphinx_snippet_options'
 LANGUAGE C IMMUTABLE;
 

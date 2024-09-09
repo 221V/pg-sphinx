@@ -1,4 +1,4 @@
-CREATE EXTENSION sphinx;
+CREATE EXTENSION manticore;
 SELECT sphinx_replace('test_index', 5, ARRAY['title', 'Title', 'content', 'Text about databases', 'user_id', 12]::text[]);
  sphinx_replace 
 ----------------
@@ -12,10 +12,10 @@ SELECT sphinx_replace('test_index', 6, ARRAY['title', 'Caption', 'content', 'Con
 (1 row)
 
 SELECT * FROM sphinx_select('test_index', 'database', 'user_id = 12', 'weight DESC, id DESC', 0, 100, NULL);
- id | weight 
-----+--------
-  6 |   1356
-  5 |   1356
+ id |
+-----
+  6 |
+  5 |
 (2 rows)
 
 SELECT sphinx_delete('test_index', 5);
@@ -25,9 +25,9 @@ SELECT sphinx_delete('test_index', 5);
 (1 row)
 
 SELECT * FROM sphinx_select('test_index', 'database', 'user_id = 12', 'weight DESC, id DESC', 0, 100, 'sort_method = ''kbuffer''');
- id | weight 
-----+--------
-  6 |   1500
+ id |
+-----
+  6 |
 (1 row)
 
 SELECT sphinx_snippet('test_index', 'database', 'Text about databases', '<mark>', '</mark>');

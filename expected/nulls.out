@@ -3,23 +3,23 @@ ERROR:  'index' parameter has to be a valid name of search index but NULL was gi
 SELECT * FROM sphinx_select('test_index', NULL, 'user_id = 12', 'weight DESC, id DESC', 0, 100, NULL);
 ERROR:  'query' parameter has to be a search query but NULL was given.
 SELECT * FROM sphinx_select('test_index', 'database', NULL, 'weight DESC, id DESC', 0, 100, NULL);
- id | weight 
-----+--------
+ id |
+-----
 (0 rows)
 
 SELECT * FROM sphinx_select('test_index', 'database', 'user_id = 12', NULL, 0, 100, NULL);
- id | weight 
-----+--------
+ id |
+-----
 (0 rows)
 
 SELECT * FROM sphinx_select('test_index', 'database', 'user_id = 12', 'weight DESC, id DESC', NULL, 100, NULL);
- id | weight 
-----+--------
+ id |
+-----
 (0 rows)
 
 SELECT * FROM sphinx_select('test_index', 'database', 'user_id = 12', 'weight DESC, id DESC', 0, NULL, NULL);
- id | weight 
-----+--------
+ id |
+-----
 (0 rows)
 
 SELECT sphinx_snippet(NULL, 'database', 'Text about databases', '<mark>', '</mark>');

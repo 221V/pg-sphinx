@@ -1,4 +1,4 @@
-CREATE EXTENSION sphinx;
+CREATE EXTENSION manticore;
 
 SELECT sphinx_replace('test_index', 5, ARRAY['title', 'Title', 'content', 'Text about databases', 'user_id', 12]::text[]);
 

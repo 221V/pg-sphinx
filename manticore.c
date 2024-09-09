@@ -1,9 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
 #include <memory.h>
 #include <mysql.h>
 
-#include "sphinx.h"
+#include "manticore.h"
 #include "stringbuilder.h"
 #include "error.h"
 
@@ -33,7 +34,7 @@ static SPH_BOOL ensure_sphinx_is_connected(sphinx_config *config, char **error)
   if (mysql_real_connect(connection, config->host, config->username,
                          config->password, NULL, config->port, NULL, 0) == NULL)
     {
-      REPORT(error, "Can't connect to sphinx server. ", mysql_error(connection));
+      REPORT(error, "Can't connect to sphinx/manticore server. ", mysql_error(connection));
 
       mysql_close(connection);
       connection = NULL;
@@ -63,6 +64,20 @@ struct sphinx_context
   MYSQL_RES *result;
 };
 
+int is_number(const PString *str1)
+{
+  int ln = str1->len;
+  if(ln == 0) return 0; // false
+  int res = 1; // true
+  for(int i = 0; i < ln; i++){
+    if(!(isdigit(str1->str[i]) )){
+      res = 0; // false
+      break;
+    }
+  }
+  return res;
+}
+
 sphinx_context sphinx_select(sphinx_config *config,
                              const PString *index,
                              const PString *match,
@@ -80,7 +95,8 @@ sphinx_context sphinx_select(sphinx_config *config,
     return NULL;
 
   sb = string_builder_new();
-  string_builder_append(sb, "SELECT id, weight() AS weight FROM ");
+  //string_builder_append(sb, "SELECT id, weight() AS weight FROM ");
+  string_builder_append(sb, "SELECT id FROM ");
   string_builder_append(sb, config->prefix);
   string_builder_append_pstr(sb, index);
   string_builder_append(sb, " WHERE MATCH(");
@@ -93,7 +109,8 @@ sphinx_context sphinx_select(sphinx_config *config,
       string_builder_append_pstr(sb, condition);
     }
 
-  string_builder_append(sb, " GROUP BY id WITHIN GROUP ORDER BY weight DESC ");
+  //string_builder_append(sb, " GROUP BY id WITHIN GROUP ORDER BY weight DESC ");
+  string_builder_append(sb, " GROUP BY id WITHIN GROUP ORDER BY weight() DESC ");
 
   if (PSTR_NOT_EMPTY(order))
     {
@@ -125,8 +142,8 @@ sphinx_context sphinx_select(sphinx_config *config,
 }
 
 SPH_BOOL sphinx_context_next(sphinx_context ctx,
-                             int *id,
-                             int *weight)
+                             int *id)
+//                           int *weight)
 {
   MYSQL_ROW row;
 
@@ -139,8 +156,8 @@ SPH_BOOL sphinx_context_next(sphinx_context ctx,
 
   if (id)
     *id = row[0] ? atoi(row[0]) : 0;
-  if (weight)
-    *weight = row[1] ? atoi(row[1]) : 0;
+  //if (weight)
+  //  *weight = row[1] ? atoi(row[1]) : 0;
 
   return SPH_TRUE;
 }
@@ -188,6 +205,70 @@ void sphinx_replace(sphinx_config *config,
 
   if (mysql_query(connection, sb->str))
     REPORT(error, "Can't execute replace query: ", sb->str, "; ", mysql_error(connection));
+
+  string_builder_free(sb);
+}
+
+void sphinx_update(sphinx_config *config,
+                   const PString *index,
+                   const PString *match,
+                   const PString *condition,
+                   const Dict *data,
+                   char **error)
+{
+  size_t i;
+  StringBuilder *sb;
+
+  if (!ensure_sphinx_is_connected(config, error))
+    return;
+  
+  char is_match = PSTR_NOT_EMPTY(match) ? 1 : 0;
+  char is_condition = PSTR_NOT_EMPTY(condition) ? 1 : 0;
+  if (!(is_condition || is_match)) // when no condition (no id) and no match
+    return;
+  
+  sb = string_builder_new();
+  string_builder_append(sb, "UPDATE ");
+  string_builder_append(sb, config->prefix);
+  string_builder_append_pstr(sb, index);
+  string_builder_append(sb, " SET ");
+  for (i = 0; i < data->len; ++i)
+    {
+      if (i == 0)
+        {
+          string_builder_append(sb, "`");
+        }else{
+          string_builder_append(sb, ", `");
+        }
+      string_builder_append_pstr(sb, &data->names[i]);
+      string_builder_append(sb, "` = ");
+      
+      if(is_number(&data->values[i]))
+      {
+        string_builder_append_pstr(sb, &data->values[i]);
+      }else{
+        string_builder_append_sql_string(sb, &data->values[i]);
+      }
+      
+    }
+  if (is_match)
+    {
+      string_builder_append(sb, " WHERE MATCH(");
+      string_builder_append_sql_string(sb, match);
+      if (is_condition)
+        {
+          string_builder_append(sb, ") AND ");
+          string_builder_append_pstr(sb, condition);
+        }else{
+          string_builder_append(sb, ")");
+        }
+    }else{
+      string_builder_append(sb, " WHERE ");
+      string_builder_append_pstr(sb, condition);
+    }
+
+  if (mysql_query(connection, sb->str))
+    REPORT(error, "Can't execute update query: ", sb->str, "; ", mysql_error(connection));
 
   string_builder_free(sb);
 }

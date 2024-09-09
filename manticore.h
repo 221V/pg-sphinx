@@ -20,6 +20,8 @@ void default_config(sphinx_config *config);
 
 typedef struct sphinx_context *sphinx_context;
 
+int is_number(const PString *str);
+
 sphinx_context sphinx_select(sphinx_config *config,
                              const PString *index,
                              const PString *match,
@@ -30,8 +32,8 @@ sphinx_context sphinx_select(sphinx_config *config,
                              const PString *options,
                              char **error);
 SPH_BOOL sphinx_context_next(sphinx_context ctx,
-                             /*OUT*/ int *id,
-                             /*OUT*/ int *weight);
+                             /*OUT*/ int *id);
+                             /*OUT*/ //int *weight);
 void sphinx_context_free(sphinx_context ctx);
 
 void sphinx_replace(sphinx_config *config,
@@ -39,6 +41,13 @@ void sphinx_replace(sphinx_config *config,
                     int id,
                     const Dict *data,
                     char **error);
+
+void sphinx_update(sphinx_config *config,
+                   const PString *index,
+                   const PString *match,
+                   const PString *condition,
+                   const Dict *data,
+                   char **error);
 
 void sphinx_delete(sphinx_config *config,
                    const PString *index,

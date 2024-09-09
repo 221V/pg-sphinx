@@ -1,0 +1,6 @@
+# manticore extension
+comment = 'Connector to Sphinx/Manticore Search Server'
+default_version = '0.3'
+module_pathname = '$libdir/manticore'
+relocatable = true
+

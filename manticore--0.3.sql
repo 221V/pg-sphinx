@@ -1,4 +1,4 @@
-CREATE TYPE sphinx_search_result AS (id int, weight int);
+CREATE TYPE sphinx_search_result AS (id int); /* , weight int); */
 
 CREATE OR REPLACE FUNCTION sphinx_select(
   /*index*/     varchar,
@@ -9,7 +9,7 @@ CREATE OR REPLACE FUNCTION sphinx_select(
   /*limit*/     int,
   /*options*/   varchar)
 RETURNS SETOF sphinx_search_result
-AS 'sphinx', 'pg_sphinx_select'
+AS 'manticore', 'pg_sphinx_select'
 LANGUAGE C IMMUTABLE;
 
 CREATE OR REPLACE FUNCTION sphinx_replace(
@@ -17,14 +17,23 @@ CREATE OR REPLACE FUNCTION sphinx_replace(
   /*id*/        int,
   /*data*/      varchar[])
 RETURNS VOID
-AS 'sphinx', 'pg_sphinx_replace'
+AS 'manticore', 'pg_sphinx_replace'
+LANGUAGE C IMMUTABLE;
+
+CREATE OR REPLACE FUNCTION sphinx_update(
+  /*index*/     varchar,
+  /*query*/     varchar,
+  /*condition*/ varchar,
+  /*data*/      varchar[])
+RETURNS VOID
+AS 'manticore', 'pg_sphinx_update'
 LANGUAGE C IMMUTABLE;
 
 CREATE OR REPLACE FUNCTION sphinx_delete(
   /*index*/     varchar,
   /*id*/        int)
 RETURNS VOID
-AS 'sphinx', 'pg_sphinx_delete'
+AS 'manticore', 'pg_sphinx_delete'
 LANGUAGE C IMMUTABLE;
 
 CREATE OR REPLACE FUNCTION sphinx_snippet(
@@ -34,7 +43,7 @@ CREATE OR REPLACE FUNCTION sphinx_snippet(
   /*before*/    varchar,
   /*after*/     varchar)
 RETURNS VARCHAR
-AS 'sphinx', 'pg_sphinx_snippet'
+AS 'manticore', 'pg_sphinx_snippet'
 LANGUAGE C IMMUTABLE;
 
 CREATE OR REPLACE FUNCTION sphinx_snippet_options(
@@ -43,7 +52,7 @@ CREATE OR REPLACE FUNCTION sphinx_snippet_options(
   /*data*/      varchar,
   /*options*/   varchar[])
 RETURNS VARCHAR
-AS 'sphinx', 'pg_sphinx_snippet_options'
+AS 'manticore', 'pg_sphinx_snippet_options'
 LANGUAGE C IMMUTABLE;
 
 CREATE TABLE sphinx_config (

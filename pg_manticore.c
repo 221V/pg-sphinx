@@ -12,7 +12,7 @@
 #endif
 
 #include "dict.h"
-#include "sphinx.h"
+#include "manticore.h"
 
 #ifdef PG_MODULE_MAGIC
 PG_MODULE_MAGIC;
@@ -23,6 +23,9 @@ Datum pg_sphinx_select(PG_FUNCTION_ARGS);
 
 PG_FUNCTION_INFO_V1(pg_sphinx_replace);
 Datum pg_sphinx_replace(PG_FUNCTION_ARGS);
+
+PG_FUNCTION_INFO_V1(pg_sphinx_update);
+Datum pg_sphinx_update(PG_FUNCTION_ARGS);
 
 PG_FUNCTION_INFO_V1(pg_sphinx_delete);
 Datum pg_sphinx_delete(PG_FUNCTION_ARGS);
@@ -113,7 +116,8 @@ Datum pg_sphinx_select(PG_FUNCTION_ARGS)
 {
   FuncCallContext *funcctx;
   sphinx_context ctx;
-  int id, weight;
+  //int id, weight;
+  int id;
   char *error = NULL;
 
   if (SRF_IS_FIRSTCALL())
@@ -166,16 +170,19 @@ Datum pg_sphinx_select(PG_FUNCTION_ARGS)
   funcctx = SRF_PERCALL_SETUP();
   ctx = funcctx->user_fctx;
 
-  if (sphinx_context_next(ctx, &id, &weight))
+  //if (sphinx_context_next(ctx, &id, &weight))
+  if (sphinx_context_next(ctx, &id))
     {
       Datum result;
-      Datum values[2];
-      char nulls[2] = {0, 0};
+      //Datum values[2];
+      //char nulls[2] = {0, 0};
+      Datum values[1];
+      char null[1] = {0};
 
       values[0] = Int32GetDatum(id);
-      values[1] = Int32GetDatum(weight);
+      //values[1] = Int32GetDatum(weight);
 
-      result = HeapTupleGetDatum(heap_form_tuple(funcctx->tuple_desc, values, nulls));
+      result = HeapTupleGetDatum(heap_form_tuple(funcctx->tuple_desc, values, null)); // nulls));
 
       SRF_RETURN_NEXT(funcctx, result);
     }
@@ -241,6 +248,39 @@ Datum pg_sphinx_replace(PG_FUNCTION_ARGS)
 
   fetch_config(&config);
   sphinx_replace(&config, &index, id, &data, &error);
+  if (error) {
+    elog(ERROR, "%s", error);
+    free(error);
+  }
+
+  pfree(data.names);
+  pfree(data.values);
+
+  PG_RETURN_VOID();
+}
+
+Datum pg_sphinx_update(PG_FUNCTION_ARGS)
+{
+  ArrayType *input;
+  char *error = NULL;
+  sphinx_config config;
+  Dict data;
+
+  if (PG_ARGISNULL(0) || PG_ARGISNULL(3) || (PG_ARGISNULL(1) && PG_ARGISNULL(2)) )
+    PG_RETURN_VOID();
+
+  PString index = {0, 0}, query = {0, 0}, condition = {0, 0};
+
+  TO_PSTRING(index, PG_GETARG_DATUM(0), 0);
+  TO_PSTRING(query, PG_GETARG_DATUM(1), 0);
+  TO_PSTRING(condition, PG_GETARG_DATUM(2), 0);
+  input = PG_GETARG_ARRAYTYPE_P(3);
+
+  if (array_to_dict(input, &data))
+    PG_RETURN_VOID();
+
+  fetch_config(&config);
+  sphinx_update(&config, &index, &query, &condition, &data, &error);
   if (error) {
     elog(ERROR, "%s", error);
     free(error);
