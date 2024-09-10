@@ -36,6 +36,12 @@ SPH_BOOL sphinx_context_next(sphinx_context ctx,
                              /*OUT*/ //int *weight);
 void sphinx_context_free(sphinx_context ctx);
 
+void sphinx_insert(sphinx_config *config,
+                   const PString *index,
+                   int id,
+                   const Dict *data,
+                   char **error);
+
 void sphinx_replace(sphinx_config *config,
                     const PString *index,
                     int id,

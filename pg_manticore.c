@@ -21,6 +21,9 @@ PG_MODULE_MAGIC;
 PG_FUNCTION_INFO_V1(pg_sphinx_select);
 Datum pg_sphinx_select(PG_FUNCTION_ARGS);
 
+PG_FUNCTION_INFO_V1(pg_sphinx_insert);
+Datum pg_sphinx_insert(PG_FUNCTION_ARGS);
+
 PG_FUNCTION_INFO_V1(pg_sphinx_replace);
 Datum pg_sphinx_replace(PG_FUNCTION_ARGS);
 
@@ -225,6 +228,38 @@ static int array_to_dict(ArrayType *input, Dict *dict)
     }
   array_free_iterator(iter);
   return 0;
+}
+
+Datum pg_sphinx_insert(PG_FUNCTION_ARGS)
+{
+  PString index = {0, 0};
+  int id;
+  ArrayType *input;
+  char *error = NULL;
+  sphinx_config config;
+  Dict data;
+
+  if (PG_ARGISNULL(0) || PG_ARGISNULL(1) || PG_ARGISNULL(2))
+    PG_RETURN_VOID();
+
+  TO_PSTRING(index, PG_GETARG_DATUM(0), 0);
+  id = PG_GETARG_UINT32(1);
+  input = PG_GETARG_ARRAYTYPE_P(2);
+
+  if (array_to_dict(input, &data))
+    PG_RETURN_VOID();
+
+  fetch_config(&config);
+  sphinx_insert(&config, &index, id, &data, &error);
+  if (error) {
+    elog(ERROR, "%s", error);
+    free(error);
+  }
+
+  pfree(data.names);
+  pfree(data.values);
+
+  PG_RETURN_VOID();
 }
 
 Datum pg_sphinx_replace(PG_FUNCTION_ARGS)

@@ -12,6 +12,14 @@ RETURNS SETOF sphinx_search_result
 AS 'manticore', 'pg_sphinx_select'
 LANGUAGE C IMMUTABLE;
 
+CREATE OR REPLACE FUNCTION sphinx_insert(
+  /*index*/     varchar,
+  /*id*/        int,
+  /*data*/      varchar[])
+RETURNS VOID
+AS 'manticore', 'pg_sphinx_insert'
+LANGUAGE C IMMUTABLE;
+
 CREATE OR REPLACE FUNCTION sphinx_replace(
   /*index*/     varchar,
   /*id*/        int,

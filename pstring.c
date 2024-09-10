@@ -14,7 +14,7 @@ int pstring_is_one_of(const PString *pstr, ...)
   while ((p = va_arg(argp, const char *)) != NULL)
     {
       if (PSRT_IS_EQUAL_TO(pstr, p))
-	return 1;
+  return 1;
     }
   va_end(argp);
 

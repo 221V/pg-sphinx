@@ -50,6 +50,16 @@ sphinx_select(
 ```
 Returns (id) rows.  
 
+### Insert data
+```sql
+sphinx_insert(
+  /*index*/     varchar,
+  /*id*/        int,
+  /*data*/      varchar[])
+```
+Create document with specified id. Data array must have following format:  
+```ARRAY['key1', 'value2', ...]```
+
 ### Update data (REPLACE INTO for updating full-text-indexing-columns only)
 ```sql
 sphinx_replace(
