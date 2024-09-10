@@ -91,6 +91,14 @@ sphinx_delete(
 ```
 Removes specified document.  
 
+### TRUNCATE index
+```sql
+sphinx_truncate(
+  /*index*/     varchar,
+  /*type*/      varchar)
+```
+TRUNCATE index, `type = 'RTINDEX'` for rt index type.  
+
 ### Get snippet
 ```sql
 sphinx_snippet(

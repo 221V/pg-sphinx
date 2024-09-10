@@ -60,6 +60,11 @@ void sphinx_delete(sphinx_config *config,
                    int id,
                    char **error);
 
+void sphinx_truncate(sphinx_config *config,
+                     const PString *index,
+                     const PString *type,
+                     char **error);
+
 typedef void (*return_data_callback)(void *data, size_t size, void *user_data);
 
 void sphinx_snippet(sphinx_config *config,

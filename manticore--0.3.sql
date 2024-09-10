@@ -44,6 +44,13 @@ RETURNS VOID
 AS 'manticore', 'pg_sphinx_delete'
 LANGUAGE C IMMUTABLE;
 
+CREATE OR REPLACE FUNCTION sphinx_truncate(
+  /*index*/     varchar,
+  /*type*/      varchar)
+RETURNS VOID
+AS 'manticore', 'pg_sphinx_truncate'
+LANGUAGE C IMMUTABLE;
+
 CREATE OR REPLACE FUNCTION sphinx_snippet(
   /*index*/     varchar,
   /*query*/     varchar,

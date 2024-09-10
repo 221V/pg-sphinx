@@ -334,6 +334,29 @@ void sphinx_delete(sphinx_config *config,
   string_builder_free(sb);
 }
 
+void sphinx_truncate(sphinx_config *config,
+                     const PString *index,
+                     const PString *type,
+                     char **error)
+{
+  StringBuilder *sb;
+
+  if (!ensure_sphinx_is_connected(config, error))
+    return;
+
+  sb = string_builder_new();
+  string_builder_append(sb, "TRUNCATE ");
+  string_builder_append_pstr(sb, type);
+  string_builder_append(sb, " ");
+  string_builder_append(sb, config->prefix);
+  string_builder_append_pstr(sb, index);
+
+  if (mysql_query(connection, sb->str))
+    REPORT(error, "Can't execute truncate query: ", sb->str, "; ", mysql_error(connection));
+
+  string_builder_free(sb);
+}
+
 void sphinx_snippet(sphinx_config *config,
                     const PString *index,
                     const PString *match,

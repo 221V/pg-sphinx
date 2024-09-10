@@ -33,6 +33,9 @@ Datum pg_sphinx_update(PG_FUNCTION_ARGS);
 PG_FUNCTION_INFO_V1(pg_sphinx_delete);
 Datum pg_sphinx_delete(PG_FUNCTION_ARGS);
 
+PG_FUNCTION_INFO_V1(pg_sphinx_truncate);
+Datum pg_sphinx_truncate(PG_FUNCTION_ARGS);
+
 PG_FUNCTION_INFO_V1(pg_sphinx_snippet);
 Datum pg_sphinx_snippet(PG_FUNCTION_ARGS);
 
@@ -342,6 +345,29 @@ Datum pg_sphinx_delete(PG_FUNCTION_ARGS)
 
   fetch_config(&config);
   sphinx_delete(&config, &index, id, &error);
+  if (error) {
+    elog(ERROR, "%s", error);
+    free(error);
+  }
+
+  PG_RETURN_VOID();
+}
+
+Datum pg_sphinx_truncate(PG_FUNCTION_ARGS)
+{
+  PString index = {0, 0};
+  PString type = {0, 0};
+  char *error = NULL;
+  sphinx_config config;
+
+  if (PG_ARGISNULL(0) || PG_ARGISNULL(1))
+    PG_RETURN_VOID();
+
+  TO_PSTRING(index, PG_GETARG_DATUM(0), 0);
+  TO_PSTRING(type, PG_GETARG_DATUM(1), 0);
+
+  fetch_config(&config);
+  sphinx_truncate(&config, &index, &type, &error);
   if (error) {
     elog(ERROR, "%s", error);
     free(error);
