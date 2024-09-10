@@ -150,4 +150,7 @@ SELECT sphinx_snippet_options('blog_posts', 'photo', 'There are photos from mond
                                     'query_mode', 'yes'])
 ```
 
+check examples1.sql  
+
+
 
