@@ -199,7 +199,16 @@ void sphinx_insert(sphinx_config *config,
   for (i = 0; i < data->len; ++i)
     {
       string_builder_append(sb, ", ");
-      string_builder_append_sql_string(sb, &data->values[i]);
+      
+      if(is_number(&data->values[i]))
+      {
+        string_builder_append_pstr(sb, &data->values[i]);
+        //int value_num = pstring_to_integer(&data->values[i]);
+        //string_builder_append_int(sb, value_num);
+      }else{
+        string_builder_append_sql_string(sb, &data->values[i]);
+      }
+      
     }
   string_builder_append(sb, ")");
 
@@ -284,6 +293,8 @@ void sphinx_update(sphinx_config *config,
       if(is_number(&data->values[i]))
       {
         string_builder_append_pstr(sb, &data->values[i]);
+        //int value_num = pstring_to_integer(&data->values[i]);
+        //string_builder_append_int(sb, value_num);
       }else{
         string_builder_append_sql_string(sb, &data->values[i]);
       }
