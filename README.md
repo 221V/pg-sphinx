@@ -58,7 +58,9 @@ sphinx_insert(
   /*data*/      varchar[])
 ```
 Create document with specified id. Data array must have following format:  
-```ARRAY['key1', 'value2', ...]```
+```ARRAY['key1', 'value2', ...]```  
+value can not be NULL -- string allowed only  
+todo fix is_number func -- add check for NULL  
 
 ### Update data (REPLACE INTO for updating full-text-indexing-columns only)
 ```sql
@@ -68,7 +70,8 @@ sphinx_replace(
   /*data*/      varchar[])
 ```
 Updates document with specified id. Data array must have following format:  
-```ARRAY['key1', 'value2', ...]```
+```ARRAY['key1', 'value2', ...]```  
+value can not be NULL -- string allowed only  
 
 ### Update data (UPDATE for updating non-full-text-indexing-columns only)
 ```sql
@@ -81,7 +84,8 @@ sphinx_update(
 query can be empty string/NULL — you can use `condition = 'id = 1'` only  
 
 Updates document with specified id. Data array must have following format:  
-```ARRAY['key1', 'value2', ...]```
+```ARRAY['key1', 'value2', ...]```  
+value can not be NULL -- string allowed only  
 
 ### Delete data
 ```sql
